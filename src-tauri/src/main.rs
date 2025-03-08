@@ -1,15 +1,16 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use tauri::command;
 use md5;
 use sha1::{Digest, Sha1};
 use sha2::Sha256;
-use tauri::command;
+use base64::engine::general_purpose;
+use base64::Engine;
 
 #[command]
 fn hash_string(input: String, alg: String) -> String {
     match alg.as_str() {
-        "md5" => {
-            format!("{:x}", md5::compute(input))
-        }
+        "md5" => format!("{:x}", md5::compute(input)),
         "sha1" => {
             let mut hasher = Sha1::new();
             hasher.update(input);
@@ -20,7 +21,8 @@ fn hash_string(input: String, alg: String) -> String {
             hasher.update(input);
             format!("{:x}", hasher.finalize())
         }
-        _ => { "Unsupported algorithm".to_string() }
+        "base64" => general_purpose::STANDARD.encode(input), // Corrigido!
+        _ => "Unsupported algorithm".to_string(),
     }
 }
 
